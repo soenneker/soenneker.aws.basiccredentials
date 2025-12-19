@@ -15,7 +15,7 @@ public sealed class BasicAwsCredentialsUtil : IBasicAwsCredentialsUtil
 
     public BasicAwsCredentialsUtil(IConfiguration configuration)
     {
-        _client = new AsyncSingleton<BasicAWSCredentials>((_, _) =>
+        _client = new AsyncSingleton<BasicAWSCredentials>(() =>
         {
             var accessKey = configuration.GetValueStrict<string>("Aws:AccessKey");
             var secretKey = configuration.GetValueStrict<string>("Aws:SecretKey");

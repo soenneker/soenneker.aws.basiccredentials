@@ -12,16 +12,20 @@ namespace Soenneker.Aws.BasicCredentials;
 public sealed class BasicAwsCredentialsUtil : IBasicAwsCredentialsUtil
 {
     private readonly AsyncSingleton<BasicAWSCredentials> _client;
+    private readonly IConfiguration _configuration;
 
     public BasicAwsCredentialsUtil(IConfiguration configuration)
     {
-        _client = new AsyncSingleton<BasicAWSCredentials>(() =>
-        {
-            var accessKey = configuration.GetValueStrict<string>("Aws:AccessKey");
-            var secretKey = configuration.GetValueStrict<string>("Aws:SecretKey");
+        _configuration = configuration;
+        _client = new AsyncSingleton<BasicAWSCredentials>(CreateCredentials);
+    }
 
-            return new BasicAWSCredentials(accessKey, secretKey);
-        });
+    private BasicAWSCredentials CreateCredentials()
+    {
+        var accessKey = _configuration.GetValueStrict<string>("Aws:AccessKey");
+        var secretKey = _configuration.GetValueStrict<string>("Aws:SecretKey");
+
+        return new BasicAWSCredentials(accessKey, secretKey);
     }
 
     public BasicAWSCredentials GetSync(CancellationToken cancellationToken = default)

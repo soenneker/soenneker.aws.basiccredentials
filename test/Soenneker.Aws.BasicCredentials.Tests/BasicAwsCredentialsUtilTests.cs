@@ -1,20 +1,19 @@
-﻿using Soenneker.Aws.BasicCredentials.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Aws.BasicCredentials.Abstract;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Aws.BasicCredentials.Tests;
 
-[Collection("Collection")]
-public sealed class BasicAwsCredentialsUtilTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class BasicAwsCredentialsUtilTests : HostedUnitTest
 {
     private readonly IBasicAwsCredentialsUtil _util;
 
-    public BasicAwsCredentialsUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public BasicAwsCredentialsUtilTests(Host host) : base(host)
     {
         _util = Resolve<IBasicAwsCredentialsUtil>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 

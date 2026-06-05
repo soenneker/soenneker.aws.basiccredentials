@@ -10,7 +10,17 @@ namespace Soenneker.Aws.BasicCredentials.Abstract;
 /// </summary>
 public interface IBasicAwsCredentialsUtil : IDisposable, IAsyncDisposable
 {
+    /// <summary>
+    /// Gets sync.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The result of the operation.</returns>
     BasicAWSCredentials GetSync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Gets the value.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task containing the result of the operation.</returns>
     ValueTask<BasicAWSCredentials> Get(CancellationToken cancellationToken = default);
 }

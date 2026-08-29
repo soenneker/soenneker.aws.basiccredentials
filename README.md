@@ -5,39 +5,52 @@
 
 # Soenneker.Aws.BasicCredentials
 
-A .NET thread-safe singleton For AWS's basic credential object, BasicAWSCredentials.
+Creates and caches the AWS SDK's `BasicAWSCredentials` from application configuration.
 
-## Install
+## Installation
 
 ```bash
 dotnet add package Soenneker.Aws.BasicCredentials
 ```
 
-## Quick start
+## Configuration
 
-```csharp
-using Soenneker.Aws.BasicCredentials.Registrars;
-using Microsoft.Extensions.DependencyInjection;
+The utility requires these keys:
 
-var services = new ServiceCollection();
-var result = services.AddBasicAwsCredentialsUtilAsSingleton();
+```json
+{
+  "Aws": {
+    "AccessKey": "access-key-id",
+    "SecretKey": "secret-access-key"
+  }
+}
 ```
 
-Adds `IBasicAwsCredentialsUtil` as a singleton service.
+Use a secret provider or environment variables (`Aws__AccessKey` and `Aws__SecretKey`) in deployed applications. Do not commit credentials to configuration files.
 
-## What you get
+## Registration and use
 
-- `IBasicAwsCredentialsUtil` — A .NET thread-safe singleton For AWS's basic credential object, BasicAWSCredentials.
-- `BasicAwsCredentialsUtilRegistrar` — A .NET thread-safe singleton For AWS's basic credential object, BasicAWSCredentials.
+```csharp
+using Amazon.Runtime;
+using Soenneker.Aws.BasicCredentials.Abstract;
+using Soenneker.Aws.BasicCredentials.Registrars;
 
-## API at a glance
+builder.Services.AddBasicAwsCredentialsUtilAsSingleton();
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `BasicAwsCredentialsUtilRegistrar.AddBasicAwsCredentialsUtilAsSingleton(services)` | Adds `IBasicAwsCredentialsUtil` as a singleton service. | The same service collection, so additional registrations can be chained. |
-| `BasicAwsCredentialsUtilRegistrar.AddBasicAwsCredentialsUtilAsScoped(services)` | Adds `IBasicAwsCredentialsUtil` as a scoped service. | The same service collection, so additional registrations can be chained. |
+public sealed class AwsClientFactory(IBasicAwsCredentialsUtil credentialsUtil)
+{
+    public async ValueTask<BasicAWSCredentials> GetCredentials(
+        CancellationToken cancellationToken) =>
+        await credentialsUtil.Get(cancellationToken);
+}
+```
 
-## Practical notes
+`GetSync()` is available for callers that cannot use the asynchronous API.
 
-- Calls that return a cached or singleton value reuse the same instance until the owning service is disposed.
-- Dispose instances you own when their scope ends so held resources can be released.
+## Lifecycle and security
+
+- Credentials are created on first access and reused for the utility's lifetime.
+- Configuration changes and rotated keys are not picked up after initialization; replace or dispose the utility to create a new credential object.
+- Missing configuration fails credential creation rather than returning blank credentials.
+- `BasicAWSCredentials` represents long-lived access keys. Prefer an AWS role or temporary credential provider when the hosting environment supports one.
+- Let the DI container dispose registered instances. Do not log the credential object or its secret values.

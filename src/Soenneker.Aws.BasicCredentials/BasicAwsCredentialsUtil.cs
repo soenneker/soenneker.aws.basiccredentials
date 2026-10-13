@@ -22,8 +22,8 @@ public sealed class BasicAwsCredentialsUtil : IBasicAwsCredentialsUtil
 
     private BasicAWSCredentials CreateCredentials()
     {
-        var accessKey = _configuration.GetValueStrict<string>("Aws:AccessKey");
-        var secretKey = _configuration.GetValueStrict<string>("Aws:SecretKey");
+        var accessKey = _configuration.GetStringStrict("Aws:AccessKey");
+        var secretKey = _configuration.GetStringStrict("Aws:SecretKey");
 
         return new BasicAWSCredentials(accessKey, secretKey);
     }
